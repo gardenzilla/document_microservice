@@ -9,9 +9,9 @@ string parser
   query(GET): "kind:ID" => eg.: "cash_in:7a", "cash_out:19", "procurement:7b"
   query(POST): "kind:data_object" => eg.: "cash_in:serialized_escaped_json"
 
-message Query {
+message QueryRequest {
   string method = 1;
-  string kind = 2;
+  string kind = 2; // ? Maybe not? Should be the part of the query?
   string query = 3;
   // This is the created_by user
   // but when we have a GET query, we
@@ -25,3 +25,30 @@ method & kind can be URL param,
 
 Once we have a deserialized QUERY, then we need to serialize it into String,
   and send it a generic query string.
+
+message QueryResponse {
+  string kind = 1;
+  string id = 2;
+  string document_pdf_base64 = 3;
+  string created_by = 4;
+  string created_at = 5;
+}
+
+service Document {
+  rpc query(QueryRequest) returns (QueryResponse);
+}
+
+--
+
+let res: QueryResponse = match (QueryRequest.method.as_str(), QueryRequest.kind.as_str()) {
+  ("get", "cash_in") => {
+    let query: GetQuery = JSON.parse_from_str(QueryRequest.query)?;
+    self.cash_in_store.get_by_id(query.id)?.into()
+  },
+  ("post", "cash_in") => {
+    let query: CashInQuery = JSON.parse_from_str(QueryRequest.query)?;
+    self.cash_in_store.create_document(query)?.to_json()
+  },
+  _ => ()
+}
+Ok(Response::new(res.to_json()))
