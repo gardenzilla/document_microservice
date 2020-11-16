@@ -1,0 +1,27 @@
+Multiple document kind
+  each has a template and input parameters
+  output is a PDF
+
+Document kinds:
+  CashIn, CashOut, Procurement Document, Inventory Document
+
+string parser
+  query(GET): "kind:ID" => eg.: "cash_in:7a", "cash_out:19", "procurement:7b"
+  query(POST): "kind:data_object" => eg.: "cash_in:serialized_escaped_json"
+
+message Query {
+  string method = 1;
+  string kind = 2;
+  string query = 3;
+  // This is the created_by user
+  // but when we have a GET query, we
+  // actually do not create anything
+  // Thats why we renamed it to query_by_userid
+  string query_by_userid = 4;
+}
+
+method & kind can be URL param,
+  query should be request BODY as JSON object.
+
+Once we have a deserialized QUERY, then we need to serialize it into String,
+  and send it a generic query string.
