@@ -71,6 +71,7 @@ pub enum DocumentError {
     NotFound { kind: DocumentKind, id: u32 },
     IdTaken { id: u32 },
     RenderError(String),
+    FileError(String),
 }
 
 impl ToString for DocumentError {
@@ -83,6 +84,7 @@ impl ToString for DocumentError {
             ),
             DocumentError::IdTaken { id } => format!("ID taken id: {}", id),
             DocumentError::RenderError(e) => format!("Render Error: {}", e),
+            DocumentError::FileError(e) => format!("File error {}", e),
         }
     }
 }
@@ -113,9 +115,7 @@ fn pdf_render(latex: &str) -> Result<Vec<u8>, RenderError> {
     let input_file = tmp.path().join("input.tex");
     let output_file = tmp.path().join("input.pdf");
 
-    let mut texinputs = OsString::new();
-
-    fs::write(&input_file, latex).map_err(|_| RenderError::TexFileCreationError)?;
+    let _ = fs::write(&input_file, latex).map_err(|_| RenderError::TexFileCreationError)?;
 
     let mut cmd = Command::new("pdflatex");
 
@@ -142,10 +142,14 @@ pub fn create_document<T>(
 where
     T: Serialize,
 {
+    let pdf_path =
+        std::path::PathBuf::from(format!("data/documents/{}/{}.pdf", kind.get_location(), id));
+
+    if pdf_path.exists() {
+        return Err(DocumentError::IdTaken { id: id });
+    }
+
     let reg = Handlebars::new();
-    let mut file =
-        std::fs::File::create(format!("data/documents/{}/{}.pdf", kind.get_location(), id))
-            .unwrap();
     // render without register
     let res = reg
         .render_template(kind.get_template(), &data)
@@ -154,8 +158,13 @@ where
     let mut pdf_vec = pdf_render(&res).map_err(|e| DocumentError::RenderError(e.to_string()))?;
     println!("Vec is {:?}", &pdf_vec);
 
-    file.write_all(&mut pdf_vec).unwrap();
-    file.flush();
+    let mut file = std::fs::File::create(pdf_path).unwrap();
+
+    file.write_all(&mut pdf_vec)
+        .map_err(|e| DocumentError::FileError(e.to_string()))?;
+
+    file.flush()
+        .map_err(|e| DocumentError::FileError(e.to_string()))?;
 
     Ok(QueryResponse {
         kind: kind,
