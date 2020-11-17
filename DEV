@@ -30,8 +30,6 @@ message QueryResponse {
   string kind = 1;
   string id = 2;
   string document_pdf_base64 = 3;
-  string created_by = 4;
-  string created_at = 5;
 }
 
 service Document {
@@ -52,3 +50,12 @@ let res: QueryResponse = match (QueryRequest.method.as_str(), QueryRequest.kind.
   _ => ()
 }
 Ok(Response::new(res.to_json()))
+
+--
+
+pub trait DocumentMamager<T>
+where
+  T: Serialize + Deserialize {
+  pub fn get(&self, id: u32) -> Result<QueryResponse, Error>;
+  pub fn create(&mut self, data: T) -> Result<QueryResponse, Error>;
+}
