@@ -59,3 +59,5 @@ where
   pub fn get(&self, id: u32) -> Result<QueryResponse, Error>;
   pub fn create(&mut self, data: T) -> Result<QueryResponse, Error>;
 }
+
+sudo apt-get -y install texlive-base texlive-latex-recommended texlive-pictures texlive-latex-extra

@@ -1,0 +1,89 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Invoice Template
+% LaTeX Template
+% Version 1.0 (3/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Trey Hunner (http://www.treyhunner.com/)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Important note:
+% This template requires the invoice.cls file to be in the same directory as 
+% the .tex file. The invoice.cls file provides the style used for structuring the
+% document.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT CONFIGURATION
+%----------------------------------------------------------------------------------------
+
+\documentclass{cash_in} % Use the custom template class (cash_in.cls)
+\usepackage{graphicx}
+
+\def \tab {\hspace*{3ex}} % Define \tab to create some horizontal white space
+
+\usepackage[export]{adjustbox}
+\usepackage{fancyhdr}
+\usepackage[yyyymmdd,hhmmss]{datetime}
+
+\pagestyle{fancy}
+\fancyhf{}% Clear all headers/footers
+\renewcommand{\headrulewidth}{.4pt}% Header rule width
+\renewcommand{\footrulewidth}{0pt}% No footer rule
+\fancyhead[L]{% Left header
+  \rule[-1.75\baselineskip]{0pt}{0pt}% Strut to ensure a 1/4 \baselineskip between image and header rule
+  \includegraphics[height=3\baselineskip,valign=c]{logo}% Image
+  \quad% Space
+  \bf{Gardenzilla}% Name
+}
+\fancyhead[R]{
+  Gardenova Kft. \\
+  4522 Nyírtass \\
+  Bem út 23/B.
+}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	HEADING SECTION
+%----------------------------------------------------------------------------------------
+\setlength{\headheight}{3.5\baselineskip}% To accommodate new oversized header
+
+\begin{center}
+  \large{\bf Bevételi pénztárbizonylat} \\
+  Azonosító: {\bf 34h56k}
+  \bigskip
+  \bigskip
+  \bigskip
+\end{center}
+
+
+{\bf Befizető:} \hfil {\bf Átvette:} \\
+Mezei Péter \hfil {John Doe} \\ % Invoice recipient
+4522 Nyírtass, Alkotmány út 55. \hfil
+4522 Nyírtass, Alkotmány út 55. \\ % Recipient's company
+
+\bigskip
+{\bf Kiállítás időpontja:} {\today} - \currenttime \\ % Invoice date
+\bigskip
+
+Befizető a mai napon az alábbi összeget befizette a Gardenzilla - Gardenova Kft. 4522 Nyírtass, Adí út 11. - pénztárába: {\bf 12.470 HUF} \\ \\
+Átvevő kijelenti, hogy az átadott összeget maradéktalanul átvette, és azt a pénztárban elhelyezte.
+\\ \\
+Összeg: {\bf 12.470 HUF}
+\\ \\
+Nyírtass, {\today} - \currenttime
+
+\bigskip
+\noindent\begin{tabular}{ll}
+  \makebox[2.5in]{\hrulefill} & \makebox[2.5in]{\hrulefill} \\
+  Befizető                    & Átvette                     \\[8ex]% adds space between the two sets of signatures
+\end{tabular}
+
+\end{document}

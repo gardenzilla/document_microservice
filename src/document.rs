@@ -36,10 +36,10 @@ impl DocumentKind {
     }
     fn get_template(&self) -> &'static str {
         match self {
-            DocumentKind::CashIn => std::include_str!("../templates/cash_in.tex"),
-            DocumentKind::CashOut => std::include_str!("../templates/cash_out.tex"),
-            DocumentKind::Procurement => std::include_str!("../templates/procurement.tex"),
-            DocumentKind::InventoryLog => std::include_str!("../templates/inventory_log.tex"),
+            DocumentKind::CashIn => std::include_str!("templates/latex/cash_in.tex"),
+            DocumentKind::CashOut => std::include_str!("templates/latex/cash_out.tex"),
+            DocumentKind::Procurement => std::include_str!("templates/latex/procurement.tex"),
+            DocumentKind::InventoryLog => std::include_str!("templates/latex/inventory_log.tex"),
         }
     }
 }
@@ -110,6 +110,9 @@ impl ToString for RenderError {
     }
 }
 
+// Render Latex &str to PDF
+// Returns the generated pdf file as byte vector
+// todo!: should have better error handling: latex parse error, and process error
 fn pdf_render(latex: &str) -> Result<Vec<u8>, RenderError> {
     let tmp = tempdir::TempDir::new("pdf_render").map_err(|_| RenderError::TempDirError)?;
     let input_file = tmp.path().join("input.tex");
