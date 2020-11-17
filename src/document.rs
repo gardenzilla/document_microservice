@@ -158,6 +158,11 @@ where
     let mut pdf_vec = pdf_render(&res).map_err(|e| DocumentError::RenderError(e.to_string()))?;
     println!("Vec is {:?}", &pdf_vec);
 
+    // Create dir if not exist
+    if let Some(root_path) = pdf_path.parent() {
+        fs::create_dir_all(root_path).map_err(|e| DocumentError::FileError(e.to_string()))?;
+    }
+
     let mut file = std::fs::File::create(pdf_path).unwrap();
 
     file.write_all(&mut pdf_vec)
