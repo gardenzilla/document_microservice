@@ -57,7 +57,7 @@
 
 \begin{center}
   \large{\bf Bevételi pénztárbizonylat} \\
-  Azonosító: {\bf 34h56k}
+  Azonosító: {\bf {{prefix_id}}}
   \bigskip
   \bigskip
   \bigskip
@@ -65,20 +65,20 @@
 
 
 {\bf Befizető:} \hfil {\bf Átvette:} \\
-Mezei Péter \hfil {John Doe} \\ % Invoice recipient
-4522 Nyírtass, Alkotmány út 55. \hfil
-4522 Nyírtass, Alkotmány út 55. \\ % Recipient's company
+{{{data.payee_name}}} \hfil {{{data.receiver_name}}} \\ % Invoice recipient
+{{data.payee_address}} \hfil
+{{data.receiver_address}} \\ % Recipient's company
 
 \bigskip
-{\bf Kiállítás időpontja:} {\today} - \currenttime \\ % Invoice date
+{\bf Kiállítás időpontja:} {{data.date}} \\ % Invoice date
 \bigskip
 
 Befizető a mai napon az alábbi összeget befizette a Gardenzilla - Gardenova Kft. 4522 Nyírtass, Adí út 11. - pénztárába: {\bf 12.470 HUF} \\ \\
 Átvevő kijelenti, hogy az átadott összeget maradéktalanul átvette, és azt a pénztárban elhelyezte.
 \\ \\
-Összeg: {\bf 12.470 HUF}
+Összeg: {\bf {{data.amount}} HUF}
 \\ \\
-Nyírtass, {\today} - \currenttime
+Nyírtass, {{data.date}} - \currenttime
 
 \bigskip
 \noindent\begin{tabular}{ll}

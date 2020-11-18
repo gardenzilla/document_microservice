@@ -3,17 +3,31 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Data {
-    // payee_name: String,
-// payee_address: String,
-// receiver_name: String,
-// receiver_address: String,
-// date: DateTime<Utc>,
-// amount: i32,
+    payee_name: String,
+    payee_address: String,
+    receiver_name: String,
+    receiver_address: String,
+    date: String,
+    amount: i32,
 }
 
 impl Data {
-    pub fn new() -> Self {
-        Data {}
+    pub fn new(
+        payee_name: String,
+        payee_address: String,
+        receiver_name: String,
+        receiver_address: String,
+        date: String,
+        amount: i32,
+    ) -> Self {
+        Self {
+            payee_name,
+            payee_address,
+            receiver_name,
+            receiver_address,
+            date,
+            amount,
+        }
     }
 }
 
@@ -33,8 +47,8 @@ impl crate::document::DocumentProvider<Data> for CashIn {
         Ok(self)
     }
 
-    fn get_data(&self) -> Option<&Data> {
-        self.data.as_ref()
+    fn get_data(&self) -> Option<Data> {
+        self.data.clone()
     }
 
     fn get_location(&self) -> &'static str {
@@ -42,5 +56,8 @@ impl crate::document::DocumentProvider<Data> for CashIn {
     }
     fn get_id(&self) -> u32 {
         self.id
+    }
+    fn get_prefix(&self) -> &'static str {
+        "bga"
     }
 }
