@@ -3,10 +3,17 @@ use std::error::Error;
 mod document;
 mod templates;
 
+use document::*;
+
 fn main() -> Result<(), Box<dyn Error>> {
-    match document::create_document(2, document::DocumentKind::CashIn, ()) {
-        Ok(_) => println!("OK"),
-        Err(e) => println!("Error {:?}", e),
-    }
+    let cashin = templates::cash_in::CashIn::init(18)
+        .unwrap()
+        .set_data(templates::cash_in::Data::new())
+        .unwrap()
+        .create_document()
+        .unwrap()
+        .get_document_base64()
+        .unwrap();
+    println!("Base64 is => {}", cashin);
     Ok(())
 }

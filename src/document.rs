@@ -2,6 +2,7 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use handlebars::Handlebars;
@@ -49,8 +50,11 @@ where
         // Create temp template variable
         let mut template: String = String::new();
 
+        // Define template_path to get access tempalte file(s)
+        let template_path = Path::new("templates").join(self.get_location());
+
         // Read template file
-        File::open(&format!("templates/{}/template.tex", self.get_location()))
+        File::open(&template_path.join("template.tex"))
             .map_err(|e| {
                 DocumentError::InternalError(format!(
                     "A template.tex file nem nyitható meg! {}",
@@ -75,7 +79,7 @@ where
             .map_err(|_| DocumentError::InternalError(format!("Temp folder error")))?;
 
         // Copy all the template files into the temp dir
-        fs::read_dir(tmp.path())
+        fs::read_dir(&template_path)
             .map_err(|e| {
                 DocumentError::InternalError(format!(
                     "template folder read error! {}",
@@ -85,7 +89,7 @@ where
             .into_iter()
             .for_each(|f| {
                 if let Ok(file) = f {
-                    let _ = fs::copy(file.path(), tmp);
+                    let _ = fs::copy(file.path(), &tmp.path().join(file.file_name()));
                 }
             });
 
@@ -93,7 +97,7 @@ where
         let input_file_path = tmp.path().join(INPUT_TEX_NAME);
 
         // Generate parsed tex file
-        let input_file = File::create(&input_file_path).map_err(|e| {
+        let _ = File::create(&input_file_path).map_err(|e| {
             DocumentError::InternalError(format!(
                 "input auto generated tex file cannot created! {}",
                 e.to_string()
@@ -107,6 +111,11 @@ where
                 e.to_string()
             ))
         })?;
+
+        fs::read_dir(&tmp)
+            .unwrap()
+            .into_iter()
+            .for_each(|f| println!("File: {:?}", f.unwrap().file_name()));
 
         // Set output PDF path
         let output_file_path = tmp.path().join(OUTPUT_PDF_NAME);
@@ -137,7 +146,7 @@ where
             &self.get_id()
         ));
 
-        fs::create_dir_all(&document_path).map_err(|e| {
+        fs::create_dir_all(&format!("data/documents/{}", &self.get_location())).map_err(|e| {
             DocumentError::InternalError(format!(
                 "Error while creating root path for document! {}",
                 e.to_string()
@@ -228,128 +237,4 @@ impl ToString for DocumentKind {
             DocumentKind::InventoryLog => format!("inventory_log"),
         }
     }
-}
-
-impl DocumentKind {
-    fn get_location(&self) -> &'static str {
-        match self {
-            DocumentKind::CashIn => "cash_in",
-            DocumentKind::CashOut => "cash_out",
-            DocumentKind::Procurement => "procurement",
-            DocumentKind::InventoryLog => "inventory_log",
-        }
-    }
-    fn get_template(&self) -> &'static str {
-        match self {
-            DocumentKind::CashIn => std::include_str!("templates/latex/cash_in/cash_in.tex"),
-            DocumentKind::CashOut => std::include_str!("templates/latex/cash_out/cash_out.tex"),
-            DocumentKind::Procurement => {
-                std::include_str!("templates/latex/procurement/procurement.tex")
-            }
-            DocumentKind::InventoryLog => {
-                std::include_str!("templates/latex/inventory_log/inventory_log.tex")
-            }
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum Method {
-    Get,
-    Post,
-}
-
-impl ToString for Method {
-    fn to_string(&self) -> String {
-        match self {
-            Method::Get => format!("get"),
-            Method::Post => format!("post"),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct QueryResponse {
-    kind: DocumentKind,
-    id: String,
-    document_pdf_base64: String,
-}
-
-// Render Latex &str to PDF
-// Returns the generated pdf file as byte vector
-// todo!: should have better error handling: latex parse error, and process error
-fn pdf_render(latex: &str) -> Result<Vec<u8>, RenderError> {
-    let tmp = tempdir::TempDir::new("pdf_render").map_err(|_| RenderError::TempDirError)?;
-    let input_file = tmp.path().join("input.tex");
-    let output_file = tmp.path().join("input.pdf");
-
-    let _ = fs::write(&input_file, latex).map_err(|_| RenderError::TexFileCreationError)?;
-
-    let mut cmd = Command::new("pdflatex");
-
-    cmd.args(&["input.tex"]);
-
-    cmd.current_dir(tmp.path());
-
-    let output = cmd
-        .output()
-        .map_err(|e| RenderError::RenderError(e.to_string()))?;
-
-    if !output.status.success() {
-        return Err(RenderError::PdfLatexError);
-    }
-
-    fs::read(output_file).map_err(|e| RenderError::PdfReadError(e.to_string()))
-}
-
-pub fn create_document<T>(
-    id: u32,
-    kind: DocumentKind,
-    data: T,
-) -> Result<QueryResponse, DocumentError>
-where
-    T: Serialize,
-{
-    let pdf_path =
-        std::path::PathBuf::from(format!("data/documents/{}/{}.pdf", kind.get_location(), id));
-
-    if pdf_path.exists() {
-        return Err(DocumentError::IdTaken { id: id });
-    }
-
-    let reg = Handlebars::new();
-    // render without register
-    let res = reg
-        .render_template(kind.get_template(), &data)
-        .map_err(|e| DocumentError::RenderError(e.to_string()))?;
-
-    let mut pdf_vec = pdf_render(&res).map_err(|e| DocumentError::RenderError(e.to_string()))?;
-    println!("Vec is {:?}", &pdf_vec);
-
-    // Create dir if not exist
-    if let Some(root_path) = pdf_path.parent() {
-        fs::create_dir_all(root_path).map_err(|e| DocumentError::FileError(e.to_string()))?;
-    }
-
-    let mut file = std::fs::File::create(pdf_path).unwrap();
-
-    file.write_all(&mut pdf_vec)
-        .map_err(|e| DocumentError::FileError(e.to_string()))?;
-
-    file.flush()
-        .map_err(|e| DocumentError::FileError(e.to_string()))?;
-
-    Ok(QueryResponse {
-        kind: kind,
-        id: format!("{:x}", id),
-        document_pdf_base64: "".into(),
-    })
-}
-
-pub fn load_document(
-    method: Method,
-    kind: DocumentKind,
-    id: u32,
-) -> Result<QueryResponse, DocumentError> {
-    todo!()
 }

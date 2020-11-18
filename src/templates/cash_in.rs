@@ -1,16 +1,23 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Data {
-    payee_name: String,
-    payee_address: String,
-    receiver_name: String,
-    receiver_address: String,
-    date: DateTime<Utc>,
-    amount: i32,
+    // payee_name: String,
+// payee_address: String,
+// receiver_name: String,
+// receiver_address: String,
+// date: DateTime<Utc>,
+// amount: i32,
 }
 
+impl Data {
+    pub fn new() -> Self {
+        Data {}
+    }
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct CashIn {
     id: u32,
     data: Option<Data>,
