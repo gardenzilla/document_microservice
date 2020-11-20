@@ -34,16 +34,25 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Time elapsed: {:?}", now.elapsed());
 
+    let now = Instant::now();
+
     let id2 = provider2
         .create_document("{\"name\":\"Peter Mezei\"}")
         .unwrap();
 
     println!("Time elapsed: {:?}", now.elapsed());
 
-    println!(
-        "base64 is: {}",
-        provider.get_document_base64("GRDB-2020-1").unwrap()
-    );
+    let now = Instant::now();
+
+    let base_64 = provider.get_document_base64("GRDB-2020-1").unwrap();
+    println!("base64 len is {}", base_64.len());
+
+    println!("Time elapsed: {:?}", now.elapsed());
+
+    // println!(
+    //     "base64 is: {}",
+    //     provider.get_document_base64("GRDB-2020-1").unwrap()
+    // );
 
     // println!(
     //     "Base 64 is => {}",
