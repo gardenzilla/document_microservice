@@ -15,3 +15,5 @@ chrono = {version = "0.4", features = ["serde"]}
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "*"
 tempdir = "*"
+tokio = {version = "0.2", features = ["full"]}
+tonic = "0.3"
