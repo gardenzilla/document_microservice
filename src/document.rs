@@ -1,5 +1,6 @@
 use core::fmt::Debug;
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::io::Write;
 use std::path::Path;
@@ -137,8 +138,59 @@ where
         let object: T = serde_json::from_str(data)
             .map_err(|e| DocumentError::SerializationError(e.to_string()))?;
 
-        // Define next ID
-        let next_id: u32 = 1; // Todo!: implement this one!
+        let folder_path = std::path::PathBuf::from(format!(
+            "data/documents/{}/{}/{}",
+            self.provider.get_location(),
+            self.prefix.to_string(),
+            chrono::Utc::today().year(),
+        ));
+
+        // Create folder_path if not exist yet
+        fs::create_dir_all(&folder_path).map_err(|e| {
+            DocumentError::InternalError(format!(
+                "Error while creating root path for document! {}",
+                e.to_string()
+            ))
+        })?;
+
+        let next_id_path = folder_path.join("next_id.txt");
+
+        // Create next_id file if not exist
+        if !next_id_path.exists() {
+            let mut file = File::create(&next_id_path).expect(&format!(
+                "Could not create next id file! {:?}",
+                &next_id_path
+            ));
+            let _ = file
+                .write_all("1".as_bytes())
+                .expect("Failed to write 1 as next id init value");
+            file.flush().expect("Failed to flush next id file");
+        }
+
+        // Read next id
+        let mut next_id_str = String::new();
+        match File::open(&next_id_path) {
+            Ok(mut file) => {
+                let _ = file
+                    .read_to_string(&mut next_id_str)
+                    .expect("Error while reading next_id file");
+            }
+            Err(_) => panic!(format!("Could not open next id file! {:?}", &next_id_path)),
+        }
+
+        let next_id = next_id_str.parse::<u32>().expect(&format!(
+            "Error while parse next id to u32! {:?}",
+            &next_id_path
+        ));
+
+        // Increment and save next id
+        match OpenOptions::new().write(true).open(&next_id_path) {
+            Ok(mut file) => {
+                file.write_all(format!("{}", next_id + 1).as_bytes())
+                    .expect("Failed to save increment next id!");
+            }
+            Err(_) => panic!(format!("Could not open next id file! {:?}", &next_id_path)),
+        }
 
         let new_document_id: Id = Id::new(
             self.prefix.to_string(),
@@ -147,13 +199,7 @@ where
         );
 
         // Create path to the final PDF
-        let pdf_path = std::path::PathBuf::from(format!(
-            "data/documents/{}/{}/{}/{}",
-            self.provider.get_location(),
-            self.prefix.to_string(),
-            new_document_id.year,
-            new_document_id.as_file_name()
-        ));
+        let pdf_path = folder_path.join(new_document_id.as_file_name());
 
         // Check if the file already exist
         // Impossible error situation if next_id implementation is correct
@@ -261,15 +307,6 @@ where
 
         let mut pdf_bytes = fs::read(&output_file_path).map_err(|e| {
             DocumentError::InternalError(format!("Failed to read the generated PDF file! {}", e))
-        })?;
-
-        let parent_path = pdf_path.parent().unwrap(); // todo!: implement error handling here!
-
-        fs::create_dir_all(parent_path).map_err(|e| {
-            DocumentError::InternalError(format!(
-                "Error while creating root path for document! {}",
-                e.to_string()
-            ))
         })?;
 
         let mut document_file = File::create(&pdf_path).map_err(|e| {
