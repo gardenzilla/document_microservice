@@ -57,7 +57,7 @@
 
 \begin{center}
   \large{\bf Bevételi pénztárbizonylat} \\
-  Azonosító: {\bf {{prefix_id}}}
+  Azonosító: {\bf {{id}}}
   \bigskip
   \bigskip
   \bigskip
@@ -70,15 +70,15 @@
 {{data.receiver_address}} \\ % Recipient's company
 
 \bigskip
-{\bf Kiállítás időpontja:} {{data.date}} \\ % Invoice date
+{\bf Kiállítás időpontja:} {{date_local}} {{time_local}} \\ % Invoice date
 \bigskip
 
-Befizető a mai napon az alábbi összeget befizette a Gardenzilla - Gardenova Kft. 4522 Nyírtass, Adí út 11. - pénztárába: {\bf 12.470 HUF} \\ \\
+Befizető a mai napon az alábbi összeget befizette a Gardenzilla - Gardenova Kft. 4522 Nyírtass, Adí út 11. - pénztárába: {\bf {{data.amount}} HUF} \\ \\
 Átvevő kijelenti, hogy az átadott összeget maradéktalanul átvette, és azt a pénztárban elhelyezte.
 \\ \\
-Összeg: {\bf {{data.amount}} HUF}
+Összeg: {\bf {{fmt_number data.amount}} HUF}
 \\ \\
-Nyírtass, {{data.date}} - \currenttime
+Nyírtass, {{date_local}}
 
 \bigskip
 \noindent\begin{tabular}{ll}

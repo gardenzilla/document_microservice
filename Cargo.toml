@@ -8,10 +8,11 @@ version = "0.1.0"
 
 [dependencies]
 gzlib = "*"
-handlebars = "*"
+handlebars = "3.5.1"
 # packman = "*"
 base64 = "0.13.0"
 chrono = {version = "0.4", features = ["serde"]}
+num-format = "0.4.0"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "*"
 tempdir = "*"

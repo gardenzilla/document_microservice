@@ -61,3 +61,6 @@ where
 }
 
 sudo apt-get -y install texlive-base texlive-latex-recommended texlive-pictures texlive-latex-extra
+
+# Set server timezone
+sudo timedatectl set-timezone Europe/Budapest

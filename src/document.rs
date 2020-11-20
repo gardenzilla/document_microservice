@@ -1,13 +1,15 @@
 use core::fmt::Debug;
+use handlebars::*;
+use num_format::{Locale, ToFormattedString};
+use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
-use std::{fs, path::PathBuf};
 
-use chrono::Datelike;
+use chrono::{Datelike, Timelike};
 use handlebars::Handlebars;
 use serde::{Deserialize, Serialize};
 
@@ -138,6 +140,8 @@ where
         let object: T = serde_json::from_str(data)
             .map_err(|e| DocumentError::SerializationError(e.to_string()))?;
 
+        object.is_valid()?;
+
         let folder_path = std::path::PathBuf::from(format!(
             "data/documents/{}/{}/{}",
             self.provider.get_location(),
@@ -211,7 +215,14 @@ where
         }
 
         // Register a new handlebars instance
-        let reg = Handlebars::new();
+        let mut reg = Handlebars::new();
+
+        // Register number helper
+        // todo!: somehow generalize the format locale
+        handlebars_helper!(fmt_number: |x: u64| x.to_formatted_string(&Locale::hu));
+
+        // Register handlerbar helpers
+        reg.register_helper("fmt_number", Box::new(fmt_number));
 
         // Create temp template variable
         let mut template: String = String::new();
@@ -239,7 +250,7 @@ where
         let rendered_template = reg
             .render_template(
                 &template,
-                &DataHolder::new(self.prefix.0, next_id.to_string(), object),
+                &DataHolder::new(self.prefix.0, new_document_id.to_string(), object),
             )
             .map_err(|e| DocumentError::RenderError(e.to_string()))?;
 
@@ -333,6 +344,9 @@ where
 
 pub trait DocumentProvider {
     fn get_location(&self) -> &'static str; // Should implement
+    fn is_valid(&self) -> Result<(), DocumentError> {
+        Ok(())
+    }
 }
 
 // Encode bytes array
@@ -344,10 +358,10 @@ fn base64_encode(input: &Vec<u8>) -> String {
 pub enum DocumentError {
     SerializationError(String),
     NotFound { kind: &'static str, id: String },
-    IdTaken { id: u32 },
     RenderError(String),
     InternalError(String),
     IdError,
+    DataError(String),
 }
 
 #[derive(Serialize)]
@@ -358,6 +372,11 @@ where
     id: String,
     prefix_id: String,
     data: T,
+    date_local: String,
+    time_local: String,
+    date_utc: String,
+    time_utc: String,
+    datetime_utc: String,
 }
 
 impl<T> DataHolder<T>
@@ -365,10 +384,17 @@ where
     T: Serialize,
 {
     fn new(prefix: &'static str, id: String, data: T) -> Self {
+        let now = chrono::Local::now();
+        let now_utc = chrono::Utc::now();
         DataHolder {
             id: id.clone(),
             prefix_id: format!("{}{}", prefix, id),
             data,
+            date_local: format!("{}-{}-{}", now.year(), now.month(), now.day()),
+            time_local: format!("{}:{}", now.hour(), now.minute()),
+            date_utc: format!("{}-{}-{}", now_utc.year(), now_utc.month(), now_utc.day()),
+            time_utc: format!("{}:{}", now_utc.hour(), now_utc.minute()),
+            datetime_utc: now_utc.to_string(),
         }
     }
 }
