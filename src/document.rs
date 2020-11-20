@@ -108,7 +108,7 @@ where
         let document_path = std::path::PathBuf::from(format!(
             "data/documents/{}/{}/{}/{}",
             &self.provider.get_location(),
-            &self.prefix.to_string(),
+            id.prefix.to_string(),
             id.year,
             id.as_file_name()
         ));
@@ -281,10 +281,10 @@ where
             ))
         })?;
 
-        fs::read_dir(&tmp)
-            .unwrap()
-            .into_iter()
-            .for_each(|f| println!("File: {:?}", f.unwrap().file_name()));
+        // fs::read_dir(&tmp)
+        //     .unwrap()
+        //     .into_iter()
+        //     .for_each(|f| println!("File: {:?}", f.unwrap().file_name()));
 
         // Set output PDF path
         let output_file_path = tmp.path().join(OUTPUT_PDF_NAME);

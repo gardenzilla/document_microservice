@@ -1,15 +1,17 @@
 use std::error::Error;
 
 mod document;
-mod templates;
+mod provider;
 
 use chrono::prelude::*;
 use document::*;
+use std::time::{Duration, Instant};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let provider = document::Provider::init("GRDN", templates::cash_in::CashIn::default());
+    let provider = document::Provider::init("GRDN", provider::cash_in::CashIn::default());
+    let provider2 = document::Provider::init("GRDZ", provider::cash_out::CashOut::default());
 
-    let data_object = templates::cash_in::CashIn::new(
+    let data_object = provider::cash_in::CashIn::new(
         "Peter Mezei".into(),
         "4551 Nyíregyháza, Mogyorós utca 36.".into(),
         "Mezeiné B. Krisztina".into(),
@@ -20,14 +22,28 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let data_str = serde_json::to_string(&data_object).unwrap();
 
-    let id = provider.create_document(&data_str).unwrap();
+    let now = Instant::now();
 
+    let id = provider.create_document(&data_str).unwrap();
     println!("ID is => {}", id.to_string());
 
+    println!("Time elapsed: {:?}", now.elapsed());
+
+    let id2 = provider2
+        .create_document("{\"name\":\"Peter Mezei\"}")
+        .unwrap();
+
+    println!("Time elapsed: {:?}", now.elapsed());
+
     println!(
-        "Base 64 is => {}",
-        provider.get_document_base64("GRDN-2020-1").unwrap()
+        "base64 is: {}",
+        provider.get_document_base64("GRDB-2020-1").unwrap()
     );
+
+    // println!(
+    //     "Base 64 is => {}",
+    //     provider.get_document_base64("GRDN-2020-1").unwrap()
+    // );
 
     Ok(())
 }
