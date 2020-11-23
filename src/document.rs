@@ -187,15 +187,6 @@ where
             &next_id_path
         ));
 
-        // Increment and save next id
-        match OpenOptions::new().write(true).open(&next_id_path) {
-            Ok(mut file) => {
-                file.write_all(format!("{}", next_id + 1).as_bytes())
-                    .expect("Failed to save increment next id!");
-            }
-            Err(_) => panic!(format!("Could not open next id file! {:?}", &next_id_path)),
-        }
-
         let new_document_id: Id = Id::new(
             self.prefix.to_string(),
             chrono::Utc::today().year() as u32,
@@ -220,9 +211,11 @@ where
         // Register number helper
         // todo!: somehow generalize the format locale
         handlebars_helper!(fmt_number: |x: u64| x.to_formatted_string(&Locale::hu));
+        handlebars_helper!(fmt_numbertext: |x: u64| crate::number_text::to_text(x));
 
         // Register handlerbar helpers
         reg.register_helper("fmt_number", Box::new(fmt_number));
+        reg.register_helper("fmt_numbertext", Box::new(fmt_numbertext));
 
         // Create temp template variable
         let mut template: String = String::new();
@@ -231,7 +224,7 @@ where
         let template_path = Path::new("templates").join(self.provider.get_location());
 
         // Read template file
-        File::open(&template_path.join("template.tex"))
+        File::open(&template_path.join("template.text"))
             .map_err(|e| {
                 DocumentError::InternalError(format!(
                     "A template.tex file nem nyitható meg! {}",
@@ -326,6 +319,15 @@ where
                 e.to_string()
             ))
         })?;
+
+        // Increment and save next id
+        match OpenOptions::new().write(true).open(&next_id_path) {
+            Ok(mut file) => {
+                file.write_all(format!("{}", next_id + 1).as_bytes())
+                    .expect("Failed to save increment next id!");
+            }
+            Err(_) => panic!(format!("Could not open next id file! {:?}", &next_id_path)),
+        }
 
         File::write_all(&mut document_file, &mut pdf_bytes).map_err(|e| {
             DocumentError::InternalError(format!(

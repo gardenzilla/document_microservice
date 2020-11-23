@@ -1,0 +1,119 @@
+\documentclass{article}
+\usepackage{fancyhdr}
+\usepackage[a4paper, total={7in, 10in}, left=23mm]{geometry}
+\usepackage{graphicx}
+\usepackage[bottom]{footmisc}
+\usepackage{tabularx}
+\renewcommand{\baselinestretch}{1.1}
+
+\setlength{\headheight}{40pt}
+
+\pagenumbering{gobble}
+
+\pagestyle{fancy}
+\fancyhead[L]{
+  \rule[-1.15\baselineskip]{0pt}{0pt}% Strut to ensure a 1/4 \baselineskip between image and header rule
+  \includegraphics{logo}% Image
+  \quad% Space
+  \bf{Gardenzilla}% Name
+}
+\fancyhead[C]{\huge Bevételi pénztárbizonylat}% Add something BIG in the header
+\fancyhead[R]{sorszám: \\ \textbf { {{id}} }}
+
+\begin{document}
+
+\rule[2\baselineskip]{0pt}{0pt}% Strut to ensure a 1/4 \baselineskip between image and header rule
+\begin{minipage}[t]{0.45\textwidth}
+  \textbf {Kibocsátó:}\\
+  Gardenova Termelő és Kereskedelmi Kft. \\
+  4522 Nyírtass, Bem út 23/B. \\
+  Adószám: 23127182-2-15 \\
+  Cégjegyzékszám: 15-09-077043 \\
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+  \textbf {Befizető:}\\
+  {{data.payee_name}}\\
+  {{data.payee_address}}\\
+  Adószám: -
+\end{minipage}
+
+\rule[3\baselineskip]{0pt}{0pt}% Strut to ensure a 1/4 \baselineskip between image and header rule
+
+\begin{minipage}[t]{0.9\textwidth}
+  {\normalsize Befizető a mai napon az alábbi összeget befizette a Gardenzilla (Gardenova Kft. 4522 Nyírtass, Ady út 11.) pénztárába{\footnotemark[1]}:}
+
+  \begin{center}
+    {\bf \Large {{fmt_number data.amount}} HUF}
+
+    {\small ({{fmt_numbertext data.amount}} HUF)}
+  \end{center}
+
+  \bigskip
+
+  {\bf Befizető kijelenti}, hogy a megjelölt összeget a mai napon átadta; {\bf pénztáros kijelenti}, hogy az átadott összeget maradéktalanul átvette, és azt a pénztárban elhelyezte.
+
+  \bigskip
+
+  A befizetés jogcíme: számla kiegyenlítése (GRDN-2020-1149).
+
+  \rule[2\baselineskip]{0pt}{0pt}
+
+  Nyírtass, {{date_local}}
+\end{minipage}
+
+\rule[2\baselineskip]{0pt}{0pt}
+
+\begin{minipage}[t]{0.45\textwidth}
+  \makebox[2.5in]{\hrulefill} \\
+  {\bf Befizető} aláírása \\
+  Személyi igazolvány száma:
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+  \makebox[2.5in]{\hrulefill} \\
+  {\bf Pénztáros} aláírása\\
+  Személyi igazolvány száma:
+\end{minipage}
+
+\rule[2\baselineskip]{0pt}{0pt}
+
+\noindent\makebox[6.45in]{\rule{\paperwidth}{0.4pt}}
+
+\rule[2\baselineskip]{0pt}{0pt}
+
+\begin{minipage}[t]{0.45\textwidth}
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{ |>{\raggedright\arraybackslash}p{3cm}|>{\raggedright\arraybackslash}p{4cm}| }
+    \hline
+    Tranzakció típusa & Befizetés                                            \\
+    \hline
+    Befizető          & {{data.payee_name}}, {{data.payee_address}}          \\
+    \hline
+    Befizetés jogcíme & -                                                    \\
+    \hline
+    Befizetett összeg & {{fmt_number data.amount}} HUF                       \\
+    \hline
+    Pénztáros         & Zsurkai Zsolt                                        \\
+    \hline
+    Pénztár           & Központi\footnotemark[1] (4522 Nyírtass, Ady út 11.) \\
+    \hline
+    Befizetés ideje   & {{date_local}} {{time_local}}                        \\
+    \hline
+    Megjegyzés        & -                                                    \\
+    \hline
+  \end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+  \makebox[2.5in]{\hrulefill} \\
+  {\bf Ellenőr} aláírása \\
+  Név:
+
+  \bigskip
+  \makebox[2.5in]{\hrulefill} \\
+  {\bf Könyvelő} aláírása\\
+  Név:
+\end{minipage}
+\footnotetext[1]{A Gardenova Kft. az Ady út 11. szám alatti telephelyén egy pénztárat üzemeltet.}
+\end{document}

@@ -4,13 +4,13 @@ extern crate serde_json;
 use std::error::Error;
 
 mod document;
-mod number_text;
+pub mod number_text;
 mod provider;
 
 use std::time::Instant;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let provider = document::Provider::init("GRDN", provider::cash_in::CashIn::default());
+    let provider = document::Provider::init("GZCIA", provider::cash_in::CashIn::default());
     let provider2 = document::Provider::init("GRDZ", provider::cash_out::CashOut::default());
 
     let data_object = provider::cash_in::CashIn::new(
@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         "Mezeiné B. Krisztina".into(),
         "4551 Nyíregyháza, Mogyorós utca 36.".into(),
         "2020-11-18 17:29".into(),
-        75000,
+        1_127_945,
     );
 
     let data_str = serde_json::to_string(&data_object).unwrap();
