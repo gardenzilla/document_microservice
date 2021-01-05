@@ -7,4 +7,4 @@ RUN apt-get install curl -y
 RUN sudo timedatectl set-timezone Europe/Budapest
 STOPSIGNAL SIGINT
 ENV RUST_LOG=trace
-ENTRYPOINT ["invoice_microservice"]
+ENTRYPOINT ["document_microservice"]
